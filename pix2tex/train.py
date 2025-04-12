@@ -26,16 +26,19 @@ def train(args):
     model = get_model(args)
     if torch.cuda.is_available() and not args.no_cuda:
         gpu_memory_check(model, args)
-    max_bleu, max_token_acc = 0, 0
     out_path = os.path.join(args.model_path, args.name)
     os.makedirs(out_path, exist_ok=True)
 
     if args.load_chkpt is not None:
         model.load_state_dict(torch.load(args.load_chkpt, map_location=device))
 
-    def save_models(e, step=0):
-        torch.save(model.state_dict(), os.path.join(out_path, '%s_e%02d_step%02d.pth' % (args.name, e+1, step)))
+    def save_models(epoch, step, bleu_score=0, edit_distance=0, token_accuracy=0):
+        torch.save(model.state_dict(), os.path.join(out_path, '%s_epoch%02d_step%02d.pth' % (args.name, epoch+1, step+1)))
         yaml.dump(dict(args), open(os.path.join(out_path, 'config.yaml'), 'w+'))
+        if bleu_score > 0 or edit_distance>0 or token_accuracy>0: 
+            with open(os.path.join(out_path, 'epoch%02d_step%02d_value.txt' % (epoch+1, step+1) ), 'w+') as file:
+                file.write(f"bleu_score:{bleu_score}, edit_distance:{edit_distance}, token_accuracy:{token_accuracy}")
+
 
     opt = get_optimizer(args.optimizer)(model.parameters(), args.lr, betas=args.betas)
     scheduler = get_scheduler(args.scheduler)(opt, step_size=args.lr_step, gamma=args.gamma)
@@ -65,9 +68,7 @@ def train(args):
                         wandb.log({'train/loss': total_loss})
                 if (i+1+len(dataloader)*e) % args.sample_freq == 0:
                     bleu_score, edit_distance, token_accuracy = evaluate(model, valdataloader, args, num_batches=int(args.valbatches*e/args.epochs), name='val')
-                    if bleu_score > max_bleu and token_accuracy > max_token_acc:
-                        max_bleu, max_token_acc = bleu_score, token_accuracy
-                        save_models(e, step=i)
+                    save_models(e, step=i, bleu_score=bleu_score,edit_distance=edit_distance,token_accuracy=token_accuracy)
             if (e+1) % args.save_freq == 0:
                 save_models(e, step=len(dataloader))
             if args.wandb:

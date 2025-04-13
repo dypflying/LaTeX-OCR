@@ -22,11 +22,15 @@ from rapidfuzz.distance import Levenshtein
 def normalize_text(text):
     # Replace fences
     text = text.replace("$", "")
-    text = text.replace("\[", "")
-    text = text.replace("\]", "")
-    text = text.replace("\(", "")
-    text = text.replace("\)", "")
-    text = text.strip()
+    #text = text.replace("[", "")
+    #text = text.replace("]", "")
+    #text = text.replace("(", "")
+    #text = text.replace(")", "")
+    #text = text.replace(r"\[", "")
+    #text = text.replace(r"\]", "")
+    #text = text.replace(r"\(", "")
+    #text = text.replace(r"\)", "")
+    #text = text.strip()
     return text
 
 

@@ -154,7 +154,7 @@ def main():
     parser.add_argument("--data_path", type=str, help="Path to JSON file with source images/equations", default=os.path.join(settings.DATA_DIR, "bench_data.json"))
     parser.add_argument("--result_path", type=str, help="Path to JSON file to save results to.", default=os.path.join(settings.DATA_DIR, "bench_results.json"))
     parser.add_argument("--max", type=int, help="Maximum number of images to benchmark.", default=None)
-    parser.add_argument("--easylatex", type=str, help="Run pix2tex scoring", default=False)
+    parser.add_argument("--easylatex", type=str, help="Run pix2tex scoring", default="")
     parser.add_argument("--nougat", action="store_true", help="Run nougat scoring", default=False)
     parser.add_argument("--texify", action="store_true", help="Run texify scoring", default=False)
     args = parser.parse_args()
@@ -233,8 +233,7 @@ def main():
     print(tabulate(score_table, headers=["Method", *score_headers]))
     print()
     print("Higher is better for BLEU and METEOR, lower is better for edit distance and time taken.")
-    print("Note that pix2tex is unbatched (I couldn't find a batch inference method in the docs), so time taken is higher than it should be.")
-
+    
     with open(result_path, "w") as f:
         json.dump(write_data, f, indent=4)
 

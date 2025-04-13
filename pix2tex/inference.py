@@ -62,14 +62,14 @@ class LatexOCR:
     last_pic = None
 
     @in_model_path()
-    def __init__(self, arguments=None):
+    def __init__(self, modelPath:str,  arguments=None):
         """Initialize a LatexOCR model
 
         Args:
             arguments (Union[Namespace, Munch], optional): Special model parameters. Defaults to None.
         """
         if arguments is None:
-            arguments = Munch({'config': 'settings/config.yaml', 'checkpoint': 'checkpoints/weights.pth', 'no_cuda': True, 'no_resize': False})
+            arguments = Munch({'config': 'settings/config.yaml', 'checkpoint': modelPath, 'no_cuda': True, 'no_resize': False})
         logging.getLogger().setLevel(logging.FATAL)
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
         with open(arguments.config, 'r') as f:
@@ -78,8 +78,8 @@ class LatexOCR:
         self.args.update(**vars(arguments))
         self.args.wandb = False
         self.args.device = 'cuda' if torch.cuda.is_available() and not self.args.no_cuda else 'cpu'
-        if not os.path.exists(self.args.checkpoint):
-            download_checkpoints()
+        #if not os.path.exists(self.args.checkpoint):
+        #    download_checkpoints()
         self.model = get_model(self.args)
         self.model.load_state_dict(torch.load(self.args.checkpoint, map_location=self.args.device))
         self.model.eval()
